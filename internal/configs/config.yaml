@@ -1,0 +1,6 @@
+service:
+  port: ":8080"
+  secretJWT: "superSecretJWT"
+
+database:
+  dataSourcesName: "postgres://postgres:secret@localhost:5432/catalog-music?sslmode=disable"
