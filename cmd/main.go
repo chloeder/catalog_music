@@ -2,6 +2,10 @@ package main
 
 import (
 	"catalog-music/internal/configs"
+	membershipsHandler "catalog-music/internal/handlers/memberships"
+	"catalog-music/internal/models/memberships"
+	membershipsRepo "catalog-music/internal/repositories/memberships"
+	membershipsService "catalog-music/internal/services/memberships"
 	"catalog-music/pkg/internalsql"
 	"log"
 
@@ -34,11 +38,20 @@ func main() {
 	cfg = configs.GetConfig()
 
 	// Initialize the database connection
-	_, err := internalsql.Connect(cfg.Database.DataSourcesName)
+	db, err := internalsql.Connect(cfg.Database.DataSourcesName)
 	if err != nil {
 		// If database connection fails, log the error and exit
 		log.Fatalf("failed to connect to the database: %v", err)
 	}
+
+	// Initialize the database tables
+	db.AutoMigrate(&memberships.User{})
+
+	membershipRepo := membershipsRepo.NewRepository(db)
+	membershipService := membershipsService.NewService(cfg, membershipRepo)
+	membershipHandler := membershipsHandler.NewHandler(r, membershipService)
+
+	membershipHandler.AuthRoute()
 
 	r.Run(cfg.Service.Port)
 }
