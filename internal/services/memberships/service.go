@@ -7,7 +7,7 @@ import (
 
 type membershipRepository interface {
 	CreateUser(user *memberships.User) error
-	GetUser(id uint, email, username string) (memberships.User, error)
+	GetUser(id uint, email, username string) (*memberships.User, error)
 }
 
 type service struct {

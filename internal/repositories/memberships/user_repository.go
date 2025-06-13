@@ -6,10 +6,10 @@ func (r *repository) CreateUser(user *memberships.User) error {
 	return r.db.Create(user).Error
 }
 
-func (r *repository) GetUser(id uint, email, username string) (memberships.User, error) {
+func (r *repository) GetUser(id uint, email, username string) (*memberships.User, error) {
 	var user memberships.User
-	if err := r.db.Where("id = ? OR email = ? OR username = ?", id, email, username).First(&user).Error; err != nil {
-		return memberships.User{}, err
+	if err := r.db.Where("id = ?", id).Or("email = ?", email).Or("username = ?", username).First(&user).Error; err != nil {
+		return nil, err
 	}
-	return user, nil
+	return &user, nil
 }

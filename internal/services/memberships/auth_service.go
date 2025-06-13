@@ -18,7 +18,7 @@ func (r *service) SignUp(req *memberships.SignUpRequest) error {
 		return err
 	}
 
-	if existingUser != (memberships.User{}) {
+	if existingUser != nil {
 		return errors.New("username or email already exists")
 	}
 
