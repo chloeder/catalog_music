@@ -13,7 +13,7 @@ import (
 
 func (r *service) SignUp(req *memberships.SignUpRequest) error {
 	existingUser, err := r.userRepo.GetUser(0, req.Email, req.Username)
-	if err != nil || err != gorm.ErrRecordNotFound {
+	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Error().Err(err).Msg("Error getting user")
 		return err
 	}

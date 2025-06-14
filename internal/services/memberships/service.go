@@ -5,6 +5,7 @@ import (
 	"catalog-music/internal/models/memberships"
 )
 
+//go:generate mockgen -source=service.go -destination=service_mock_test.go -package=memberships
 type membershipRepository interface {
 	CreateUser(user *memberships.User) error
 	GetUser(id uint, email, username string) (*memberships.User, error)
