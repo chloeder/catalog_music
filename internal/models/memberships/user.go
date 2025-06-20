@@ -19,6 +19,11 @@ type (
 		Username string `json:"username" binding:"required,min=3,max=32"`
 		Password string `json:"password" binding:"required,min=3,max=32"`
 	}
+
+	SignInRequest struct {
+		Username string `json:"username" binding:"required,min=3,max=32"`
+		Password string `json:"password" binding:"required,min=3,max=32"`
+	}
 )
 
 func (u *User) TableName() string {

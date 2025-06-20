@@ -70,3 +70,59 @@ func TestHandler_SignUp(t *testing.T) {
 		})
 	}
 }
+
+func TestHandler_SignIn(t *testing.T) {
+	controlMock := gomock.NewController(t)
+	defer controlMock.Finish()
+
+	mockService := NewMockmembershipService(controlMock)
+
+	tests := []struct {
+		name               string
+		mockFn             func()
+		expectedStatusCode int
+	}{
+		{
+			name: "success",
+			mockFn: func() {
+				mockService.EXPECT().SignIn(&memberships.SignInRequest{
+					Username: "test",
+					Password: "test",
+				}).Return("token", nil)
+			},
+			expectedStatusCode: http.StatusOK,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.mockFn()
+
+			api := gin.New()
+
+			h := &Handler{
+				Engine:            api,
+				membershipService: mockService,
+			}
+
+			h.AuthRoute()
+
+			w := httptest.NewRecorder()
+			endpoint := "/auth/signin"
+			model := memberships.SignInRequest{
+				Username: "test",
+				Password: "test",
+			}
+
+			jsonReq, err := json.Marshal(model)
+			assert.NoError(t, err)
+
+			body := bytes.NewReader(jsonReq)
+			req, err := http.NewRequest(http.MethodPost, endpoint, body)
+			assert.NoError(t, err)
+
+			api.ServeHTTP(w, req)
+
+			assert.Equal(t, tt.expectedStatusCode, w.Code)
+		})
+	}
+}

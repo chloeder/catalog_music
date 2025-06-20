@@ -1,8 +1,11 @@
 package memberships
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/rs/zerolog/log"
 
 	"catalog-music/internal/models/memberships"
@@ -11,8 +14,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (r *service) SignUp(req *memberships.SignUpRequest) error {
-	existingUser, err := r.userRepo.GetUser(0, req.Email, req.Username)
+func (s *service) SignUp(req *memberships.SignUpRequest) error {
+	existingUser, err := s.userRepo.GetUser(0, req.Email, req.Username)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		log.Error().Err(err).Msg("Error getting user")
 		return err
@@ -36,5 +39,32 @@ func (r *service) SignUp(req *memberships.SignUpRequest) error {
 		UpdatedBy: req.Email,
 	}
 
-	return r.userRepo.CreateUser(model)
+	return s.userRepo.CreateUser(model)
+}
+
+func (s *service) SignIn(req *memberships.SignInRequest) (string, error) {
+	existingUser, err := s.userRepo.GetUser(0, "", req.Username)
+	if err != nil && err != gorm.ErrRecordNotFound {
+		log.Error().Err(err).Msg("Error getting user")
+		return "", err
+	}
+
+	if existingUser == nil {
+		return "", errors.New("user not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(req.Password))
+	if err != nil {
+		return "", errors.New("invalid password")
+	}
+
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": existingUser.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	}).SignedString([]byte(s.cfg.Service.SecretJWT))
+	if err != nil {
+		return "", errors.New("error generating token")
+	}
+
+	return token, nil
 }
