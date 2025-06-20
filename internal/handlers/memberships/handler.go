@@ -6,8 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//go:generate mockgen -source=handler.go -destination=handler_mock_test.go -package=memberships
 type membershipService interface {
 	SignUp(req *memberships.SignUpRequest) error
+	SignIn(req *memberships.SignInRequest) (string, error)
 }
 
 type Handler struct {
@@ -25,4 +27,5 @@ func NewHandler(api *gin.Engine, membershipService membershipService) *Handler {
 func (h *Handler) AuthRoute() {
 	auth := h.Group("/auth")
 	auth.POST("/signup", h.SignUp)
+	auth.POST("/signin", h.SignIn)
 }

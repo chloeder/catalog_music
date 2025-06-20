@@ -17,7 +17,12 @@ type (
 	SignUpRequest struct {
 		Email    string `json:"email" binding:"required,email,min=3,max=32"`
 		Username string `json:"username" binding:"required,min=3,max=32"`
-		Password string `json:"password" binding:"required,min=8"`
+		Password string `json:"password" binding:"required,min=3,max=32"`
+	}
+
+	SignInRequest struct {
+		Username string `json:"username" binding:"required,min=3,max=32"`
+		Password string `json:"password" binding:"required,min=3,max=32"`
 	}
 )
 
