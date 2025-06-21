@@ -1,11 +1,15 @@
 package main
 
 import (
+	tracksHandler "catalog-music/external/handlers/tracks"
+	tracksService "catalog-music/external/service/tracks"
+	"catalog-music/external/spotify"
 	"catalog-music/internal/configs"
 	membershipsHandler "catalog-music/internal/handlers/memberships"
 	"catalog-music/internal/models/memberships"
 	membershipsRepo "catalog-music/internal/repositories/memberships"
 	membershipsService "catalog-music/internal/services/memberships"
+	"catalog-music/pkg/httpclient"
 	"catalog-music/pkg/internalsql"
 	"log"
 
@@ -47,11 +51,18 @@ func main() {
 	// Initialize the database tables
 	db.AutoMigrate(&memberships.User{})
 
+	// External services
+	httpClient := httpclient.NewHTTPClient()
+	spotifyOutbound := spotify.NewOutbound(cfg, httpClient)
+	tracksService := tracksService.NewService(spotifyOutbound)
+	tracksHandler := tracksHandler.NewHandler(r, tracksService)
+
+	// Internal services
 	membershipRepo := membershipsRepo.NewRepository(db)
 	membershipService := membershipsService.NewService(cfg, membershipRepo)
 	membershipHandler := membershipsHandler.NewHandler(r, membershipService)
 
 	membershipHandler.AuthRoute()
-
+	tracksHandler.TracksRoute()
 	r.Run(cfg.Service.Port)
 }
