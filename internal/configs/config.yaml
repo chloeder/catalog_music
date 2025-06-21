@@ -4,3 +4,8 @@ service:
 
 database:
   dataSourcesName: "postgres://postgres:secret@localhost:5432/catalog-music?sslmode=disable"
+
+spotify:
+  clientID: "73d4cea877f945c5ab52d4a9c4950d05"
+  clientSecret: "b7f19156905847bab00e8c0d72fbdaa6"
+  tokenURL: "https://accounts.spotify.com/api/token"
